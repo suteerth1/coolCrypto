@@ -22,6 +22,7 @@ class CoolCryptoWindow: public Gtk::Window{
                 void on_enc_button_clicked();
                 void on_dec_button_clicked();
                 void switch_enc_dec();
+                void change_window_based_on_text();
                 //Child widgets:
                 //Buttons
                 Gtk::Button swEncDec;

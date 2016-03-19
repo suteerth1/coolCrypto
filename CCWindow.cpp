@@ -8,7 +8,7 @@
 
 CoolCryptoWindow::CoolCryptoWindow() : m_MainBox(Gtk::ORIENTATION_HORIZONTAL),
                                        buttonAndViewBox(Gtk::ORIENTATION_VERTICAL),
-                                        swEncDec("Enc/Dec"){
+                                       swEncDec("Enc/Dec") {
 
 
     set_title("Encrypt All the Things!!!");
@@ -55,12 +55,14 @@ CoolCryptoWindow::CoolCryptoWindow() : m_MainBox(Gtk::ORIENTATION_HORIZONTAL),
                                                               &CoolCryptoWindow::on_dec_button_clicked));
 
     swEncDec.signal_pressed().connect(sigc::mem_fun(*this,
-                                                               &CoolCryptoWindow::switch_enc_dec));
+                                                    &CoolCryptoWindow::switch_enc_dec));
+    m_MainBox.signal_check_resize().connect(sigc::mem_fun(*this,
+                                                          &CoolCryptoWindow::change_window_based_on_text));
 }
 
 void CoolCryptoWindow::on_enc_button_clicked() {
 
-    if(!this->encrypt)return;
+    if (!this->encrypt)return;
     Gtk::TextBuffer::iterator tit = m_refTxtBuffer->begin();
     string in = tit.get_text(m_refTxtBuffer->end());
     string out = in;
@@ -68,21 +70,47 @@ void CoolCryptoWindow::on_enc_button_clicked() {
     Vigenere encryptor(m_entry.get_text());
     out = encryptor.encrypt(in);
     m_refTxtBufferDec->set_text(out);
+    this->set_resizable(true);
+    this->resize(this->m_MainBox.get_width(), this->m_MainBox.get_height());
+    this->set_resizable(false);
+
 }
 
 void CoolCryptoWindow::on_dec_button_clicked() {
 
-    if(this->encrypt)return;
+    if (this->encrypt)return;
     Gtk::TextBuffer::iterator tit = m_refTxtBufferDec->begin();
     string in = tit.get_text(m_refTxtBufferDec->end());
     string out = in;
     Vigenere decryptor(m_entry.get_text());
     out = decryptor.decrypt(in);
     m_refTxtBuffer->set_text(out);
+    this->set_resizable(true);
+    this->resize(this->m_MainBox.get_width(), this->m_MainBox.get_height());
+    this->set_resizable(false);
+
 }
 
 void CoolCryptoWindow::switch_enc_dec() {
-    this->encrypt = ! this->encrypt;
-    if(this->encrypt){ on_enc_button_clicked();this->swEncDec.set_label("Encrypt");}
-    else{ on_dec_button_clicked();this->swEncDec.set_label("Decrypt");}
+    this->encrypt = !this->encrypt;
+    Gtk::TextBuffer::iterator tit = m_refTxtBufferDec->begin();
+    string in = tit.get_text(m_refTxtBufferDec->end());
+    if (this->encrypt) {
+        if (in == "") {
+            m_refTxtBuffer->set_text("encrypt");
+        }
+        on_enc_button_clicked();
+        this->swEncDec.set_label("Encrypt");
+    }
+    else {
+        on_dec_button_clicked();
+        this->swEncDec.set_label("Decrypt");
+    }
+}
+
+void CoolCryptoWindow::change_window_based_on_text() {
+    this->set_resizable(true);
+    this->resize(this->m_MainBox.get_width(), this->m_MainBox.get_height());
+    this->set_resizable(false);
+
 }
